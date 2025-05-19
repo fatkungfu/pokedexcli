@@ -5,11 +5,19 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/fatkungfu/pokedexcli/internal/pokeapi"
 )
+
+type config struct {
+	pokeapiClient pokeapi.Client
+	next          *string
+	previous      *string
+}
 
 // 1. Create support for a simple REPL
 // Start an infinite for loop. This loop will execute once for every command the user types in (we don't want to exit the program after just one command)
-func startRepl() {
+func startRepl(cfg *config) {
 	// Wait for user input using bufio.NewScanner
 	reader := bufio.NewScanner(os.Stdin)
 
@@ -26,8 +34,8 @@ func startRepl() {
 
 		command, exists := getCommands()[commandName] // Check if the command exists in the map
 		if exists {                                   // If the command doesn't exist
-			err := command.callback() // Call the command's callback function
-			if err != nil {           // If there was an error
+			err := command.callback(cfg) // Call the command's callback function
+			if err != nil {              // If there was an error
 				fmt.Println(err) // Print the error message
 			}
 			continue
@@ -50,7 +58,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*config) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -64,6 +72,16 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
+		},
+		"map": {
+			name:        "map",
+			description: "Displays the next 20 location areas",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous 20 location areas",
+			callback:    commandMapb,
 		},
 	}
 }
