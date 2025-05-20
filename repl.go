@@ -13,6 +13,7 @@ type config struct {
 	pokeapiClient pokeapi.Client
 	next          *string
 	previous      *string
+	caughtPokemon map[string]pokeapi.Pokemon
 }
 
 // 1. Create support for a simple REPL
@@ -65,12 +66,18 @@ type cliCommand struct {
 	callback    func(*config, ...string) error
 }
 
+// getCommands returns the map of command names to their cliCommand definitions.
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
+		},
+		"catch": {
+			name:        "catch <pokemon_name>",
+			description: "Attempt to catch a pokemon",
+			callback:    commandCatch,
 		},
 		"explore": {
 			name:        "explore <location_name>",
