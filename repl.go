@@ -31,11 +31,15 @@ func startRepl(cfg *config) {
 		}
 
 		commandName := words[0] // Get the first word of the input (the command name)
+		args := []string{}
+		if len(words) > 1 {
+			args = words[1:]
+		}
 
 		command, exists := getCommands()[commandName] // Check if the command exists in the map
 		if exists {                                   // If the command doesn't exist
-			err := command.callback(cfg) // Call the command's callback function
-			if err != nil {              // If there was an error
+			err := command.callback(cfg, args...) // Call the command's callback function
+			if err != nil {                       // If there was an error
 				fmt.Println(err) // Print the error message
 			}
 			continue
@@ -58,7 +62,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -67,6 +71,11 @@ func getCommands() map[string]cliCommand {
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
+		},
+		"explore": {
+			name:        "explore <location_name>",
+			description: "Explore a location",
+			callback:    commandExplore,
 		},
 		"exit": {
 			name:        "exit",
